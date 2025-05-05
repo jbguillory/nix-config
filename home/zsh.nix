@@ -7,8 +7,9 @@
       creds = "source ~/.config/2fctl/credentials.sh";
       shell = "nix develop -c $SHELL";
       format = "nixfmt ~/nix-config";
-      gct = "git commit --amend --no-edit --signoff --template ~/.gitmessage";
-      
+      gct = "git commit --template ~/.config/git/gitmessage";
+      gf = "git commit --amend --no-edit --signoff";
+
       kx = "kubectx";
       c = "zed .";
       c1 = "cd ~/workspace/platform && zed .";

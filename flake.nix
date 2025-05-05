@@ -45,7 +45,7 @@
       };
       user = {
         name = "jbguillory";
-        fullName = "John Guillory";
+        fullName = "Blair Guillory";
         email = "john.guillory@secondfront.com";
         signingkey = "C6805809D5D717BD";
       };

@@ -36,6 +36,9 @@
     gcc
     nodejs_23
     openssl
+    signal-desktop
+    stern
+    cosign
   ];
 
   stylix = {
@@ -48,23 +51,39 @@
   };
 
   programs.zed-editor.userSettings.vim_mode = lib.mkForce false;
-  programs.git.includes = [
-    {
-      condition = "gitdir:~/personal/*";
-      path = "/home/jbguillory/.config/git/config-personal";
-    }
-    {
-      condition = "gitdir:~/nix-config/*";
-      path = "/home/jbguillory/.config/git/config-personal";
-    }
-  ];
+  programs.zed-editor.userSettings.relative_line_numbers = lib.mkForce false;
+
+  programs.git = {
+    enable = true;
+
+    includes = [
+      {
+        condition = "gitdir:~/personal/*";
+        path = "/home/jbguillory/.config/git/config-personal";
+      }
+      {
+        condition = "gitdir:~/nix-config/*";
+        path = "/home/jbguillory/.config/git/config-personal";
+      }
+    ];
+
+    extraConfig = {
+      commit.template = "/home/jbguillory/.config/git/gitmessage";
+    };
+  };
 
   wayland.windowManager.hyprland = {
     settings = {
+      workspace = [
+        "special:chat, on-created-empty: slack && signal-desktop"
+        "special:browser, on-created-empty: firefox"
+      ];
       exec-once = [
         "systemctl --user import-environment PATH && systemctl --user restart xdg-desktop-portal.service"
       ];
       bind = [
+        "$mainMod, x, togglespecialworkspace, browser"
+        "$mainMod, c, togglespecialworkspace, chat"
         "$mainMod, V, exec, cliphist list | fuzzel --dmenu | cliphist decode | wl-copy"
         "$mainMod, G, togglegroup"
         "$mainMod, Return, exec, kitty"
