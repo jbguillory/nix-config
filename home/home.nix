@@ -1,6 +1,10 @@
 { pkgs, lib, ... }: {
   imports = [ ./vscode.nix ./zsh.nix ];
 
+  programs = { k9s.settings.ui.skin = "skin"; };
+
+  home.sessionPath = [ "$HOME/.cargo/bin" ];
+
   secondfront.hyprland.monitors = [
     # Setup your monitors
     {
@@ -30,7 +34,6 @@
     go
     kubectx
     signal-desktop
-    rustup
     rustls-libssl
     typescript
     gcc
@@ -39,6 +42,14 @@
     signal-desktop
     stern
     cosign
+    rustlings
+    rustup
+    spotify
+    dig
+    dive
+    rustc
+    lsof
+    brightnessctl
   ];
 
   stylix = {
@@ -74,16 +85,23 @@
 
   wayland.windowManager.hyprland = {
     settings = {
+      windowrule =
+        [ "opacity 0.90,class:(dev.zed.Zed)" "float, title:^(MainPicker)$" ];
       workspace = [
+        "1, monitor:DP-6"
+        "special:spotify, on-created-empty: spotify"
         "special:chat, on-created-empty: slack && signal-desktop"
         "special:browser, on-created-empty: firefox"
+        "special:notes, on-created-empty: kitty"
       ];
       exec-once = [
         "systemctl --user import-environment PATH && systemctl --user restart xdg-desktop-portal.service"
       ];
       bind = [
         "$mainMod, x, togglespecialworkspace, browser"
+        "$mainMod, s, togglespecialworkspace, spotify"
         "$mainMod, c, togglespecialworkspace, chat"
+        "$mainMod, z, togglespecialworkspace, notes"
         "$mainMod, V, exec, cliphist list | fuzzel --dmenu | cliphist decode | wl-copy"
         "$mainMod, G, togglegroup"
         "$mainMod, Return, exec, kitty"
