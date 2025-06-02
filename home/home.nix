@@ -37,7 +37,6 @@
     rustls-libssl
     typescript
     gcc
-    nodejs_23
     openssl
     signal-desktop
     stern
@@ -50,6 +49,10 @@
     rustc
     lsof
     brightnessctl
+    hubble
+    sops
+    kail
+    kyverno
   ];
 
   stylix = {

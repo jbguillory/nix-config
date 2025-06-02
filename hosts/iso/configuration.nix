@@ -12,6 +12,7 @@ let
       "__DRIVE_PASSWORD__"
     ] [ user.name hostname drivePassword ] (builtins.readFile ./install.sh));
   };
+
 in {
 
   imports = [
@@ -19,7 +20,18 @@ in {
     "${modulesPath}/installer/cd-dvd/channel.nix"
   ];
 
-  networking.nameservers = [ "192.168.1.215" ];
+  # Enable libvirtd and configure virtualization support
+  virtualisation.libvirtd.enable = true;
+  virtualisation.spiceUSBRedirection.enable = true;
+
+  # Enable KVM modules (for hardware acceleration if supported)
+  # boot.kernelModules = [ "kvm" "kvm-intel" "kvm-amd" ]; # Add both; only one will load depending on CPU
+
+  # Add your user to the libvirtd group
+  users.users.${user.name} = {
+    isNormalUser = true;
+    extraGroups = [ "wheel" "libvirtd" ];
+  };
 
   nix = {
     channel.enable = false;
