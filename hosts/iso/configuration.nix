@@ -55,4 +55,19 @@ in {
 
   nixpkgs.hostPlatform = system;
   environment.systemPackages = with pkgs; [ run-install disko vim git ];
+} {
+  # Enable virtualization
+  virtualisation = {
+    libvirtd.enable = true;
+    spiceUSBRedirection.enable = true;
+  };
+  environment.systemPackages = with pkgs; [ OVMF ];
+  # Add your user to the libvirtd group
+  users.users.john-guillory.extraGroups = [ "libvirtd" ];
+
+  # Enable KVM
+  boot.kernelModules = [ "kvm-intel" ]; # Use "kvm-amd" for AMD processors
+
+  # Optional: Enable nested virtualization
+  boot.extraModprobeConfig = "options kvm_intel nested=1";
 }

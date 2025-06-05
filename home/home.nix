@@ -53,7 +53,117 @@
     sops
     kail
     kyverno
+    yq-go
+    jq
+    wget
+    virt-manager
+    qemu
+    bridge-utils
+    vde2
+    usbutils
   ];
+
+  # download ubuntu and move home directory
+  home.file.".local/bin/download-ubuntu-iso" = {
+    text = ''
+      #!/bin/sh
+      cd ~/Downloads
+      wget -O ubuntu-22.04.5-desktop-amd64.iso \
+        "https://releases.ubuntu.com/22.04.5/ubuntu-22.04.5-desktop-amd64.iso"
+    '';
+    executable = true;
+  };
+  # Create VM setup script
+  home.file.".local/bin/setup-ubuntu-vm" = {
+    text = ''
+      #!/bin/sh
+      # Create VM directory
+      mkdir -p ~/VMs/ubuntu-22.04
+      # Create disk image (adjust size as needed)
+      qemu-img create -f qcow2 ~/VMs/ubuntu-22.04/ubuntu.qcow2 50G
+      echo "VM disk created. Use virt-manager to create the VM or run the installation script."
+    '';
+    executable = true;
+  };
+  # QEMU installation script
+  home.file.".local/bin/install-ubuntu-vm" = {
+    text = ''
+      #!/bin/sh
+      ISO_PATH="$HOME/Downloads/ubuntu-22.04.5-desktop-amd64.iso"
+      DISK_PATH="$HOME/VMs/ubuntu-22.04/ubuntu.qcow2"
+      # CAC Reader USB IDs - update these with your actual device IDs
+      # Find your CAC reader with: lsusb
+      # Common CAC readers:
+      # SCM Microsystems: 04e6:e003
+      # Gemalto: 08e6:3478
+      # Update the line below with your actual vendor:product ID
+      CAC_USB_ID="04e6:5116"  # Change this to match your CAC reader
+      if [ ! -f "$ISO_PATH" ]; then
+        echo "Ubuntu ISO not found at $ISO_PATH"
+        echo "Run download-ubuntu-iso first"
+        exit 1
+      fi
+      # Check if CAC reader is connected
+      if lsusb | grep -q "$CAC_USB_ID"; then
+        echo "CAC reader detected, enabling USB passthrough"
+        USB_PASSTHROUGH="-device usb-host,vendorid=0x''${CAC_USB_ID%:*},productid=0x''${CAC_USB_ID#*:}"
+      else
+        echo "CAC reader not detected (looking for $CAC_USB_ID)"
+        echo "VM will start without CAC reader passthrough"
+        USB_PASSTHROUGH=""
+      fi
+      qemu-system-x86_64 \
+        -enable-kvm \
+        -m 4096 \
+        -cpu host \
+        -smp 4 \
+        -drive file="$DISK_PATH",format=qcow2 \
+        -cdrom "$ISO_PATH" \
+        -boot d \
+        -netdev user,id=net0 \
+        -device virtio-net,netdev=net0 \
+        -vga virtio \
+        -display gtk,gl=on \
+        -usb \
+        -device usb-ehci,id=usb \
+        $USB_PASSTHROUGH
+    '';
+    executable = true;
+  };
+  # Script to run the VM after installation
+  home.file.".local/bin/run-ubuntu-vm" = {
+    text = ''
+      #!/bin/sh
+      DISK_PATH="$HOME/VMs/ubuntu-22.04/ubuntu.qcow2"
+      # CAC Reader USB IDs - update these with your actual device IDs
+      # Find your CAC reader with: lsusb
+      CAC_USB_ID="04e6:5116"  # Change this to match your CAC reader
+      # Check if CAC reader is connected
+      if lsusb | grep -q "$CAC_USB_ID"; then
+        echo "CAC reader detected, enabling USB passthrough"
+        USB_PASSTHROUGH="-device usb-host,vendorid=0x''${CAC_USB_ID%:*},productid=0x''${CAC_USB_ID#*:}"
+      else
+        echo "CAC reader not detected (looking for $CAC_USB_ID)"
+        echo "VM will start without CAC reader passthrough"
+        USB_PASSTHROUGH=""
+      fi
+      qemu-system-x86_64 \
+        -enable-kvm \
+        -m 4096 \
+        -cpu host \
+        -smp 4 \
+        -drive file="$DISK_PATH",format=qcow2 \
+        -netdev user,id=net0 \
+        -device virtio-net,netdev=net0 \
+        -vga virtio \
+        -display gtk,gl=on \
+        -usb \
+        -device usb-ehci,id=ehci \
+        -device qemu-xhci,id=xhci \
+        $USB_PASSTHROUGH
+    '';
+    executable = true;
+  };
 
   stylix = {
     enable = true;

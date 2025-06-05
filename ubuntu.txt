@@ -1,0 +1,76 @@
+  #OLD original attempt, check home.nix for updates
+
+  # download ubuntu and move home directory
+  home.file.".local/bin/download-ubuntu-iso" = {
+    text = ''
+      #!/bin/sh
+      cd ~/Downloads
+      wget -O ubuntu-20.04.6-desktop-amd64.iso \
+        "https://releases.ubuntu.com/20.04.6/ubuntu-20.04.6-desktop-amd64.iso"
+    '';
+    executable = true;
+  };
+
+  # Create VM setup script
+  home.file.".local/bin/setup-ubuntu-vm" = {
+    text = ''
+      #!/bin/sh
+      # Create VM directory
+      mkdir -p ~/VMs/ubuntu-20.04
+
+      # Create disk image (adjust size as needed)
+      qemu-img create -f qcow2 ~/VMs/ubuntu-20.04/ubuntu.qcow2 50G
+
+      echo "VM disk created. Use virt-manager to create the VM or run the installation script."
+    '';
+    executable = true;
+  };
+
+  # QEMU installation script
+  home.file.".local/bin/install-ubuntu-vm" = {
+    text = ''
+      #!/bin/sh
+      ISO_PATH="$HOME/Downloads/ubuntu-20.04.6-desktop-amd64.iso"
+      DISK_PATH="$HOME/VMs/ubuntu-20.04/ubuntu.qcow2"
+
+      if [ ! -f "$ISO_PATH" ]; then
+        echo "Ubuntu ISO not found at $ISO_PATH"
+        echo "Run download-ubuntu-iso first"
+        exit 1
+      fi
+
+      qemu-system-x86_64 \
+        -enable-kvm \
+        -m 4096 \
+        -cpu host \
+        -smp 4 \
+        -drive file="$DISK_PATH",format=qcow2 \
+        -cdrom "$ISO_PATH" \
+        -boot d \
+        -netdev user,id=net0 \
+        -device virtio-net,netdev=net0 \
+        -vga virtio \
+        -display gtk,gl=on
+    '';
+    executable = true;
+  };
+
+  # Script to run the VM after installation
+  home.file.".local/bin/run-ubuntu-vm" = {
+    text = ''
+      #!/bin/sh
+      DISK_PATH="$HOME/VMs/ubuntu-20.04/ubuntu.qcow2"
+
+      qemu-system-x86_64 \
+        -enable-kvm \
+        -m 4096 \
+        -cpu host \
+        -smp 4 \
+        -drive file="$DISK_PATH",format=qcow2 \
+        -netdev user,id=net0 \
+        -device virtio-net,netdev=net0 \
+        -vga virtio \
+        -display gtk,gl=on
+    '';
+    executable = true;
+  };
