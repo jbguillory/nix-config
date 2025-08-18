@@ -4,8 +4,8 @@
     ./vscode.nix
     ./zsh.nix
     ./obs.nix
+    ./k9s.nix
   ];
-
   # programs = { k9s.settings.ui.skin = "skin"; };
 
   home.sessionPath = [ "$HOME/.cargo/bin" ];
