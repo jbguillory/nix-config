@@ -1,5 +1,5 @@
 { pkgs, lib, ... }: {
-  imports = [ ./vscode.nix ./zsh.nix ];
+  imports = [ ./vscode.nix ./zsh.nix ./obs.nix ];
 
   programs = { k9s.settings.ui.skin = "skin"; };
 
@@ -8,8 +8,21 @@
   secondfront.hyprland.monitors = [
     # Setup your monitors
     {
-      name = "DP-6";
+      name = "DP-5";
+
       position = "0x0";
+      # position = "auto-left";
+      # width = 2560;
+      # height = 1440;
+      width = 1920;
+      height = 1080;
+      refreshRate = 60;
+      workspace = "2";
+    }
+    {
+      name = "DP-6";
+      position = "1920x0";
+      # position = "auto-right";
       width = 1920;
       height = 1080;
       refreshRate = 60;
@@ -17,9 +30,11 @@
     }
     {
       name = "eDP-1";
-      position = "1920x0";
+      position = "3840x0";
+      # position = "auto";
       width = 1920;
       height = 1200;
+      enabled = true;
       refreshRate = 60;
     }
   ];
@@ -61,6 +76,10 @@
     bridge-utils
     vde2
     usbutils
+    google-chrome
+    brave
+    obs-studio
+    obs-studio-plugins.wlrobs
   ];
 
   # download ubuntu and move home directory
@@ -165,14 +184,14 @@
     executable = true;
   };
 
-  stylix = {
-    enable = true;
-    cursor = {
-      package = pkgs.bibata-cursors;
-      name = "Bibata-Modern-Classic";
-      size = 24;
-    };
-  };
+  # stylix = {
+  #   enable = true;
+  #   cursor = {
+  #     package = pkgs.bibata-cursors;
+  #     name = "Bibata-Modern-Classic";
+  #     size = 24;
+  #   };
+  # };
 
   programs.zed-editor.userSettings.vim_mode = lib.mkForce false;
   programs.zed-editor.userSettings.relative_line_numbers = lib.mkForce false;
@@ -204,8 +223,9 @@
         "1, monitor:DP-6"
         "special:spotify, on-created-empty: spotify"
         "special:chat, on-created-empty: slack && signal-desktop"
-        "special:browser, on-created-empty: firefox"
+        "special:browser, on-created-empty: google-chrome"
         "special:notes, on-created-empty: kitty"
+        "special:obs, on-created-empty: nvidia-offload obs --startvirtualcam --disable-shutdown-check"
       ];
       exec-once = [
         "systemctl --user import-environment PATH && systemctl --user restart xdg-desktop-portal.service"
@@ -215,6 +235,7 @@
         "$mainMod, s, togglespecialworkspace, spotify"
         "$mainMod, c, togglespecialworkspace, chat"
         "$mainMod, z, togglespecialworkspace, notes"
+        "$mainMod, O, togglespecialworkspace, obs"
         "$mainMod, V, exec, cliphist list | fuzzel --dmenu | cliphist decode | wl-copy"
         "$mainMod, G, togglegroup"
         "$mainMod, Return, exec, kitty"
