@@ -1,7 +1,12 @@
-{ pkgs, lib, ... }: {
-  imports = [ ./vscode.nix ./zsh.nix ./obs.nix ];
+{ pkgs, lib, ... }:
+{
+  imports = [
+    ./vscode.nix
+    ./zsh.nix
+    ./obs.nix
+  ];
 
-  programs = { k9s.settings.ui.skin = "skin"; };
+  # programs = { k9s.settings.ui.skin = "skin"; };
 
   home.sessionPath = [ "$HOME/.cargo/bin" ];
 
@@ -78,8 +83,6 @@
     usbutils
     google-chrome
     brave
-    obs-studio
-    obs-studio-plugins.wlrobs
   ];
 
   # download ubuntu and move home directory
@@ -217,8 +220,10 @@
 
   wayland.windowManager.hyprland = {
     settings = {
-      windowrule =
-        [ "opacity 0.90,class:(dev.zed.Zed)" "float, title:^(MainPicker)$" ];
+      windowrule = [
+        "opacity 0.90,class:(dev.zed.Zed)"
+        "float, title:^(MainPicker)$"
+      ];
       workspace = [
         "1, monitor:DP-6"
         "special:spotify, on-created-empty: spotify"
