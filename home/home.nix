@@ -82,7 +82,8 @@
     vde2
     usbutils
     google-chrome
-    brave
+    ssm-session-manager-plugin
+    discord
   ];
 
   # download ubuntu and move home directory
@@ -187,14 +188,14 @@
     executable = true;
   };
 
-  # stylix = {
-  #   enable = true;
-  #   cursor = {
-  #     package = pkgs.bibata-cursors;
-  #     name = "Bibata-Modern-Classic";
-  #     size = 24;
-  #   };
-  # };
+  stylix = {
+    enable = true;
+    cursor = {
+      package = pkgs.bibata-cursors;
+      name = "Bibata-Modern-Classic";
+      size = 24;
+    };
+  };
 
   programs.zed-editor.userSettings.vim_mode = lib.mkForce false;
   programs.zed-editor.userSettings.relative_line_numbers = lib.mkForce false;
