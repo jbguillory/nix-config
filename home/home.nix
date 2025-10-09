@@ -81,11 +81,17 @@
     bridge-utils
     vde2
     usbutils
-    google-chrome
     ssm-session-manager-plugin
     discord
+    networkmanagerapplet
+    networkmanager-openvpn
   ];
+  services = {
+    network-manager-applet = {
+      enable = true;
 
+    };
+  };
   # download ubuntu and move home directory
   home.file.".local/bin/download-ubuntu-iso" = {
     text = ''
@@ -229,7 +235,6 @@
         "1, monitor:DP-6"
         "special:spotify, on-created-empty: spotify"
         "special:chat, on-created-empty: slack && signal-desktop"
-        "special:browser, on-created-empty: google-chrome"
         "special:notes, on-created-empty: kitty"
         "special:obs, on-created-empty: nvidia-offload obs --startvirtualcam --disable-shutdown-check"
       ];
