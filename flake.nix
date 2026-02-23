@@ -2,6 +2,7 @@
   description = "USERS personal flake";
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-unstable";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.05";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -20,7 +21,7 @@
     hyprland.url = "git+https://github.com/hyprwm/Hyprland?submodules=1";
     stylix.url = "github:danth/stylix";
     # SecondFront Modules and Projects
-    secondfront.url = "github:tonybutt/modules";
+    secondfront.url = "github:marcjmiller/nix-modules";
     twofctl = {
       type = "gitlab";
       host = "code.il2.gamewarden.io";
@@ -30,12 +31,24 @@
   };
   nixConfig = {
     extra-substituters = [ "https://hyprland.cachix.org" ];
-    extra-trusted-public-keys =
-      [ "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc=" ];
+    extra-trusted-public-keys = [
+      "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
+    ];
   };
 
-  outputs = { nixpkgs, stylix, home-manager, hyprland, disko, nixos-hardware
-    , secondfront, twofctl, ... }@inputs:
+  outputs =
+    {
+      nixpkgs,
+      stylix,
+      home-manager,
+      hyprland,
+      disko,
+      nixos-hardware,
+      secondfront,
+      twofctl,
+      nixpkgs-stable,
+      ...
+    }@inputs:
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs {
@@ -49,7 +62,12 @@
         email = "john.guillory@secondfront.com";
         signingkey = "C6805809D5D717BD";
       };
-    in {
+      pkgs-stable = import nixpkgs-stable {
+        inherit system;
+        config.allowUnfree = true;
+      };
+    in
+    {
       formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-rfc-style;
       nixosConfigurations = {
         nixtop = nixpkgs.lib.nixosSystem {
@@ -74,10 +92,10 @@
       homeConfigurations = {
         "${user.name}" = home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
-          extraSpecialArgs = { inherit inputs user; };
+          extraSpecialArgs = { inherit inputs user pkgs-stable; };
           modules = [
             ./home/home.nix
-            stylix.homeManagerModules.stylix
+            stylix.homeModules.stylix
             secondfront.homeManagerModules.secondfront
           ];
         };

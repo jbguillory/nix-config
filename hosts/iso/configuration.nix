@@ -37,9 +37,9 @@ in
     "${modulesPath}/installer/cd-dvd/channel.nix"
   ];
 
-  # Enable libvirtd and configure virtualization support
-  virtualisation.libvirtd.enable = true;
-  virtualisation.spiceUSBRedirection.enable = true;
+  # # Enable libvirtd and configure virtualization support
+  # virtualisation.libvirtd.enable = true;
+  # virtualisation.spiceUSBRedirection.enable = true;
 
   # Enable KVM modules (for hardware acceleration if supported)
   # boot.kernelModules = [ "kvm" "kvm-intel" "kvm-amd" ]; # Add both; only one will load depending on CPU
@@ -87,19 +87,19 @@ in
     git
   ];
 }
-  {
-    # Enable virtualization
-    virtualisation = {
-      libvirtd.enable = true;
-      spiceUSBRedirection.enable = true;
-    };
-    environment.systemPackages = with pkgs; [ OVMF ];
-    # Add your user to the libvirtd group
-    users.users.john-guillory.extraGroups = [ "libvirtd" ];
+# {
+#   # Enable virtualization
+#   virtualisation = {
+#     libvirtd.enable = true;
+#     spiceUSBRedirection.enable = true;
+#   };
+#   environment.systemPackages = with pkgs; [ OVMF ];
+#   # Add your user to the libvirtd group
+#   users.users.john-guillory.extraGroups = [ "libvirtd" ];
 
-    # Enable KVM
-    boot.kernelModules = [ "kvm-intel" ]; # Use "kvm-amd" for AMD processors
+#   # Enable KVM
+#   boot.kernelModules = [ "kvm-intel" ]; # Use "kvm-amd" for AMD processors
 
-    # Optional: Enable nested virtualization
-    boot.extraModprobeConfig = "options kvm_intel nested=1";
-  }
+#   # Optional: Enable nested virtualization
+#   boot.extraModprobeConfig = "options kvm_intel nested=1";
+# }

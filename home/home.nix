@@ -1,4 +1,9 @@
-{ pkgs, lib, ... }:
+{
+  pkgs,
+  lib,
+  pkgs-stable,
+  ...
+}:
 {
   imports = [
     ./vscode.nix
@@ -45,7 +50,7 @@
   ];
   home.packages = with pkgs; [
     twofctl
-    pulumi-bin
+    pkgs-stable.pulumi-bin
     nixfmt
     base16-schemes
     pulseaudio
@@ -85,13 +90,70 @@
     discord
     networkmanagerapplet
     networkmanager-openvpn
+    google-chrome
+    velero
+    brave
+    gcc
+    ripgrep
+    fd
+    lazygit
   ];
+  programs.neovim = {
+    enable = true;
+    viAlias = true;
+    vimAlias = true;
+    defaultEditor = true;
+  };
+  # LazyVim requires these system dependencies
+
+  xdg.configFile = {
+    # Main entry point - bootstraps lazy.nvim and loads LazyVim
+    "nvim/init.lua".text = ''
+      -- Bootstrap lazy.nvim
+      local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+      if not (vim.uv or vim.loop).fs_stat(lazypath) then
+        local lazyrepo = "https://github.com/folke/lazy.nvim.git"
+        local out = vim.fn.system({
+          "git", "clone", "--filter=blob:none", "--branch=stable",
+          lazyrepo, lazypath
+        })
+        if vim.v.shell_error ~= 0 then
+          vim.api.nvim_echo({
+            { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
+            { out, "WarningMsg" },
+            { "\nPress any key to continue..." },
+          }, true, {})
+          vim.fn.getchar()
+          os.exit(1)
+        end
+      end
+      vim.opt.rtp:prepend(lazypath)
+
+      require("lazy").setup({
+        spec = {
+          { "LazyVim/LazyVim", import = "lazyvim.plugins" },
+          { import = "lazyvim.plugins.extras.lang.docker" },
+          { import = "plugins" },  -- your custom plugins in ~/.config/nvim/lua/plugins/
+        },
+        defaults = {
+          lazy = false,
+          version = false,
+        },
+        install = { colorscheme = { "tokyonight", "habamax" } },
+        checker = { enabled = true },
+      })
+    '';
+
+    # Your custom plugins directory - this is where you make changes
+    "nvim/lua/plugins/.keep".text = "";
+  };
   services = {
     network-manager-applet = {
       enable = true;
 
     };
   };
+
   # download ubuntu and move home directory
   home.file.".local/bin/download-ubuntu-iso" = {
     text = ''
